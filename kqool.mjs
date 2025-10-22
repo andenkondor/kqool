@@ -5,12 +5,24 @@ $.verbose = false;
 const KQOOL_EXECUTABLE = "kqool";
 const CONFIG_FILE = `${os.homedir()}/.kqool.yaml`;
 // const CONFIG_FILE = `.kqool.example.yaml`;
+const HISTORY_FILE = `${os.homedir()}/.kqool.history.kql`;
 async function checkForDependencies() {
   const hasJq = await which("jq", { nothrow: true });
   if (!hasJq) {
     echo(chalk.red("Please install jq to use kqool"));
     process.exit();
   }
+}
+
+async function saveAsHistory(fileContent) {
+  if (!fs.existsSync(HISTORY_FILE)) {
+    echo(chalk.red("Query is not saved to history."));
+    echo(
+      chalk.red(`Create file ${HISTORY_FILE} to automatically save queries `),
+    );
+    return;
+  }
+  fs.appendFileSync(HISTORY_FILE, `\n${fileContent}`);
 }
 
 function getConfig() {
@@ -196,6 +208,8 @@ async function main() {
   if (await which("pbcopy", { nothrow: true })) {
     await $`cat ${finalQueryFile} | pbcopy`;
   }
+
+  await saveAsHistory(finalQuery);
 }
 
 await main();
