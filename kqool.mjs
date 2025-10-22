@@ -190,7 +190,9 @@ async function main() {
   echo("Your query:");
   echo(chalk.bold(finalQuery));
 
-  await $`cat ${finalQueryFile} | pbcopy`;
+  if (await which("pbcopy", { nothrow: true })) {
+    await $`cat ${finalQueryFile} | pbcopy`;
+  }
 }
 
 await main();
