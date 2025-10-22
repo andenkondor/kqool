@@ -48,14 +48,16 @@ function toBase64(input) {
   return Buffer.from(input).toString("base64");
 }
 
-// TODO:
 const HELP_TEXT = [
-  chalk.italic(chalk.red("Key bindings")),
-  "ctrl-g: toggle search mode (rg <-> fzf)",
-  "ctrl-n: switch column to search",
-  "enter: open single or multiple in nvim (keep search open)",
-  "alt-enter: open single or multiple in nvim (close skan)",
-  "ctrl-s: open in IDEA (keep search open)",
+  chalk.italic(chalk.red("Help")),
+  "Type in any text to narrow the search.",
+  "You're current query is shown in the right panel.",
+  "<Enter>: Add current selection to your overall query. Resets current search text.",
+  "<Ctrl-d>: Same as <Enter>, but preserves search",
+  "<Ctrl-u>: Undo last selection.",
+  "<Ctrl-c>: Exit kqool and print overall query",
+  "<F1>: Show help section",
+  "<Esc>: Hide help section",
 ].join("\n");
 
 const currentTmpFiles = [];
@@ -142,14 +144,21 @@ async function main() {
     s: internalAddSelection,
     f: internalQueryFile,
     r: internalReload,
+    h: showHelp,
   } = minimist(process.argv.slice(3), {
     alias: {
       s: "internal-add-selection",
       f: "internal-query-file",
       r: "internal-reload",
+      h: "help",
     },
-    boolean: ["r"],
+    boolean: ["r", "h"],
   });
+
+  if (showHelp) {
+    echo("Execute kqool and hit F1 to see all possible actions.");
+    return;
+  }
 
   if (internalAddSelection && internalQueryFile) {
     handleAddSelection(internalAddSelection, internalQueryFile);
@@ -172,7 +181,6 @@ async function main() {
     "fzf",
     "--border",
     "--exact",
-    "--multi",
     "--read0",
     "--gap",
     "--highlight-line",
@@ -192,6 +200,8 @@ async function main() {
       `ctrl-u:execute-silent(sed -i "" -e "$ d" ${queryFile})+refresh-preview+transform(${KQOOL_EXECUTABLE} --internal-reload --internal-query-file ${queryFile})`,
     ],
     ...["--bind", `ctrl-c:abort`],
+    ...["--bind", `f1:change-footer(${HELP_TEXT})`],
+    ...["--bind", `esc:change-footer()`],
   ]}`.nothrow();
 
   const finalQuery = await $`jq -r '.query' ${queryFile}`.text();
