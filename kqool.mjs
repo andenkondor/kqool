@@ -4,6 +4,13 @@ $.verbose = false;
 
 const CONFIG_FILE = `${os.homedir()}/.kqool.yaml`;
 // const CONFIG_FILE = `.kqool.example.yaml`;
+async function checkForDependencies() {
+  const hasJq = await which("jq", { nothrow: true });
+  if (!hasJq) {
+    echo(chalk.red("Please install jq to use kqool"));
+    process.exit();
+  }
+}
 
 function getConfig() {
   try {
@@ -117,6 +124,7 @@ async function handleAddSelection(selection, internalQueryFile) {
 }
 
 async function main() {
+  await checkForDependencies();
   const {
     s: internalAddSelection,
     f: internalQueryFile,
