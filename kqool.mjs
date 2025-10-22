@@ -208,7 +208,10 @@ async function main() {
     ],
     ...["--border", "rounded"],
     ...["--color", "border:#3344cb,label:#aeaeae,query:#d9d9d9"],
-    ...["--color", "fg:#d0d0d0,fg+:#d0d0d0,bg:#121212,bg+:#262626"],
+    ...[
+      "--color",
+      "fg:#d0d0d0,fg+:#d0d0d0,bg:#121212,bg+:#7f1313,gutter:#121212",
+    ],
     ...["--color", "hl:#5f87af,hl+:#5fd7ff,info:#afaf87,marker:#87ff00"],
     ...[
       "--color",
