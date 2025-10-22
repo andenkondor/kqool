@@ -114,7 +114,7 @@ async function reload(internalQueryFile) {
     })
     .join("\0");
 
-  echo(`reload(echo '${toBase64(fragmentLines)}' | base64 -d)+change-query()`);
+  echo(`reload(echo '${toBase64(fragmentLines)}' | base64 -d)`);
   return;
 }
 
@@ -167,10 +167,13 @@ async function main() {
     ...["--delimiter", "\t"],
     ...["--with-nth", "1"],
     ...["--preview", `jq -r '.query' ${queryFile}`],
-
     ...[
       "--bind",
-      `enter:transform(${KQOOL_EXECUTABLE} --internal-add-selection={2} --internal-query-file ${queryFile})`,
+      `enter:transform(${KQOOL_EXECUTABLE} --internal-add-selection={2} --internal-query-file ${queryFile})+change-query()`,
+    ],
+    ...[
+      "--bind",
+      `ctrl-d:transform(${KQOOL_EXECUTABLE} --internal-add-selection={2} --internal-query-file ${queryFile})`,
     ],
     ...[
       "--bind",
