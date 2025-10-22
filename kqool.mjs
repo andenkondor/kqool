@@ -2,6 +2,7 @@
 
 $.verbose = false;
 
+const KQOOL_EXECUTABLE = "kqool";
 const CONFIG_FILE = `${os.homedir()}/.kqool.yaml`;
 // const CONFIG_FILE = `.kqool.example.yaml`;
 async function checkForDependencies() {
@@ -169,11 +170,11 @@ async function main() {
 
     ...[
       "--bind",
-      `enter:transform(./kqool.mjs --internal-add-selection={2} --internal-query-file ${queryFile})`,
+      `enter:transform(${KQOOL_EXECUTABLE} --internal-add-selection={2} --internal-query-file ${queryFile})`,
     ],
     ...[
       "--bind",
-      `ctrl-u:execute-silent(sed -i "" -e "$ d" ${queryFile})+refresh-preview+transform(./kqool.mjs --internal-reload --internal-query-file ${queryFile})`,
+      `ctrl-u:execute-silent(sed -i "" -e "$ d" ${queryFile})+refresh-preview+transform(${KQOOL_EXECUTABLE} --internal-reload --internal-query-file ${queryFile})`,
     ],
     ...["--bind", `ctrl-c:abort`],
   ]}`.nothrow();
