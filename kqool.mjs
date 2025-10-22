@@ -202,6 +202,29 @@ async function main() {
     ...["--bind", `ctrl-c:abort`],
     ...["--bind", `f1:change-footer(${HELP_TEXT})`],
     ...["--bind", `esc:change-footer()`],
+    ...[
+      "--bind",
+      `ctrl-w:jump,jump:transform(${KQOOL_EXECUTABLE} --internal-add-selection={2} --internal-query-file ${queryFile})+change-query()`,
+    ],
+    ...["--border", "rounded"],
+    ...["--color", "border:#3344cb,label:#aeaeae,query:#d9d9d9"],
+    ...["--color", "fg:#d0d0d0,fg+:#d0d0d0,bg:#121212,bg+:#262626"],
+    ...["--color", "hl:#5f87af,hl+:#5fd7ff,info:#afaf87,marker:#87ff00"],
+    ...[
+      "--color",
+      "prompt:#d7005f,spinner:#af5fff,pointer:#af5fff,header:#87afaf",
+    ],
+    ...[
+      "--jump-labels",
+      "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    ],
+    ...["--marker", ">"],
+    ...["--pointer", "◆"],
+    ...["--preview-window", "border-rounded"],
+    ...["--prompt", "> "],
+    ...["--reverse"],
+    ...["--scrollbar", "│"],
+    ...["--separator", "─"],
   ]}`.nothrow();
 
   const finalQuery = await $`jq -r '.query' ${queryFile}`.text();
