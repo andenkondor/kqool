@@ -3,11 +3,25 @@
 $.verbose = false;
 
 const CONFIG_FILE = `${os.homedir()}/.kqool.yaml`;
+// const CONFIG_FILE = `.kqool.example.yaml`;
 
 function getConfig() {
-  return YAML.parse(
-    fs.readFileSync(CONFIG_FILE, { encoding: "utf8", flag: "r" }),
-  );
+  try {
+    return YAML.parse(
+      fs.readFileSync(CONFIG_FILE, {
+        encoding: "utf8",
+        flag: "r",
+      }),
+    );
+  } catch (e) {
+    echo(
+      chalk.red(`You have no valid config file configured.
+Please create a config file under ${CONFIG_FILE}.
+You can take TBD as a starting point.`),
+    );
+    process.exit(1);
+    return;
+  }
 }
 
 function toBase64(input) {
@@ -157,6 +171,11 @@ async function main() {
   ]}`.nothrow();
 
   const finalQuery = await $`jq -r '.query' ${queryFile}`.text();
+
+  if (!finalQuery) {
+    echo("no query captured");
+    return;
+  }
   const finalQueryFile = createTempFile(finalQuery);
   echo("Your query is saved at: " + finalQueryFile);
   echo("Your query:");
