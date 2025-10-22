@@ -55,10 +55,7 @@ function replacePlaceholders(str, placeholderValues) {
   return combinations;
 }
 
-async function handleAddSelection(selection, internalQueryFile) {
-  const addSelectionObject = await $`echo ${selection} | base64 -d`.text();
-  await fs.appendFile(internalQueryFile, addSelectionObject + "\n");
-
+async function reload(internalQueryFile) {
   const currentQueryObjects = (await $`cat ${internalQueryFile}`.lines()).map(
     (q) => JSON.parse(q),
   );
@@ -99,19 +96,32 @@ async function handleAddSelection(selection, internalQueryFile) {
   return;
 }
 
+async function handleAddSelection(selection, internalQueryFile) {
+  const addSelectionObject = await $`echo ${selection} | base64 -d`.text();
+  await fs.appendFile(internalQueryFile, addSelectionObject + "\n");
+  await reload(internalQueryFile);
+}
+
 async function main() {
-  const { s: internalAddSelection, f: internalQueryFile } = minimist(
-    process.argv.slice(3),
-    {
-      alias: {
-        s: "internal-add-selection",
-        f: "internal-query-file",
-      },
+  const {
+    s: internalAddSelection,
+    f: internalQueryFile,
+    r: internalReload,
+  } = minimist(process.argv.slice(3), {
+    alias: {
+      s: "internal-add-selection",
+      f: "internal-query-file",
+      r: "internal-reload",
     },
-  );
+    boolean: ["r"],
+  });
 
   if (internalAddSelection && internalQueryFile) {
     handleAddSelection(internalAddSelection, internalQueryFile);
+    return;
+  }
+  if (internalReload && internalQueryFile) {
+    await reload(internalQueryFile);
     return;
   }
 
@@ -141,7 +151,7 @@ async function main() {
     ],
     ...[
       "--bind",
-      `ctrl-u:execute-silent(sed -i "" -e "$ d" ${queryFile})+refresh-preview`,
+      `ctrl-u:execute-silent(sed -i "" -e "$ d" ${queryFile})+refresh-preview+transform(./kqool.mjs --internal-reload --internal-query-file ${queryFile})`,
     ],
     ...["--bind", `ctrl-c:abort`],
   ]}`.nothrow();
