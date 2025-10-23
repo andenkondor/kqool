@@ -1,0 +1,41 @@
+fragments:
+  # tables
+  - containerAppConsoleLogsTable:
+    query: ContainerAppConsoleLogs
+    placeholderTransformation:
+      column:
+        - TimeGenerated
+        - Log
+  # simple fragments
+  - filterByService:
+    query: "| where ContainerName == '{{service}}'"
+  - whereColumnEqualsString:
+    query: '| where {{column}} == "someString"'
+  - whereColumnContainsString:
+    query: '| where {{column}} contains "someString"'
+  - projectTwoColumns:
+    query: "| project {{column}}, {{column}}"
+  - countByHour:
+    query: "| summarize CountByHour = count({{column}}) by bin(TimeGenerated, 1h)"
+  # fragments don't need to be full statements
+  - orContains:
+    query: "or {{column}} contains 'value'"
+  # multiline fragments with comment
+  - projectAwayColumns:
+    query: |
+      // I definitely have to try this one out:
+      // don't show columns which start with session
+      | project-away session*
+  # manipulate context
+  - charCount:
+    query: "| extend CharCount = strlen({{column}})"
+    placeholderTransformation:
+      column:
+        - CharCount
+  # just set context, no query
+  - projectAbcContext:
+    query: // set abc context - noop
+    placeholderTransformation:
+      service:
+        - super-cool-ms
+        - always-crashing-microservice
