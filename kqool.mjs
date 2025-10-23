@@ -177,63 +177,66 @@ async function main() {
 
   const queryFile = await createTempFile();
 
-  const fragmentLines = getConfig()
-    .fragments.map((f) => `${f.query}\t${toBase64(JSON.stringify(f))}`)
-    .join("\0");
-
-  await $({
-    input: fragmentLines,
-  })`${[
+  $.spawnSync(
     "fzf",
-    "--border",
-    "--read0",
-    "--gap",
-    "--highlight-line",
-    ...["--delimiter", "\t"],
-    ...["--with-nth", "1"],
-    ...["--preview", `jq -r '.query' ${queryFile}`],
-    ...[
-      "--bind",
-      `enter:transform(${KQOOL_EXECUTABLE} --internal-add-selection={2} --internal-query-file ${queryFile})+change-query()`,
+    [
+      "--border",
+      "--read0",
+      "--gap",
+      "--highlight-line",
+      ...["--delimiter", "\t"],
+      ...["--with-nth", "1"],
+      ...["--preview", `jq -r '.query' ${queryFile}`],
+      ...[
+        "--bind",
+        `start:transform(${KQOOL_EXECUTABLE} --internal-reload --internal-query-file ${queryFile})`,
+      ],
+      ...[
+        "--bind",
+        `enter:transform(${KQOOL_EXECUTABLE} --internal-add-selection={2} --internal-query-file ${queryFile})+change-query()`,
+      ],
+      ...[
+        "--bind",
+        `ctrl-d:transform(${KQOOL_EXECUTABLE} --internal-add-selection={2} --internal-query-file ${queryFile})`,
+      ],
+      ...[
+        "--bind",
+        `ctrl-u:execute-silent(sed -i "" -e "$ d" ${queryFile})+refresh-preview+transform(${KQOOL_EXECUTABLE} --internal-reload --internal-query-file ${queryFile})`,
+      ],
+      ...["--bind", `ctrl-c:abort`],
+      ...["--bind", `f1:change-footer(${HELP_TEXT})`],
+      ...["--bind", `esc:change-footer()`],
+      ...[
+        "--bind",
+        `ctrl-w:jump,jump:transform(${KQOOL_EXECUTABLE} --internal-add-selection={2} --internal-query-file ${queryFile})+change-query()`,
+      ],
+      ...["--border", "rounded"],
+      ...["--color", "border:#3344cb,label:#aeaeae,query:#d9d9d9"],
+      ...[
+        "--color",
+        "fg:#d0d0d0,fg+:#d0d0d0,bg:#121212,bg+:#7f1313,gutter:#121212",
+      ],
+      ...["--color", "hl:#5f87af,hl+:#5fd7ff,info:#afaf87,marker:#87ff00"],
+      ...[
+        "--color",
+        "prompt:#d7005f,spinner:#af5fff,pointer:#af5fff,header:#87afaf",
+      ],
+      ...[
+        "--jump-labels",
+        "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      ],
+      ...["--marker", ">"],
+      ...["--pointer", "◆"],
+      ...["--preview-window", "border-rounded"],
+      ...["--prompt", "> "],
+      ...["--reverse"],
+      ...["--scrollbar", "│"],
+      ...["--separator", "─"],
     ],
-    ...[
-      "--bind",
-      `ctrl-d:transform(${KQOOL_EXECUTABLE} --internal-add-selection={2} --internal-query-file ${queryFile})`,
-    ],
-    ...[
-      "--bind",
-      `ctrl-u:execute-silent(sed -i "" -e "$ d" ${queryFile})+refresh-preview+transform(${KQOOL_EXECUTABLE} --internal-reload --internal-query-file ${queryFile})`,
-    ],
-    ...["--bind", `ctrl-c:abort`],
-    ...["--bind", `f1:change-footer(${HELP_TEXT})`],
-    ...["--bind", `esc:change-footer()`],
-    ...[
-      "--bind",
-      `ctrl-w:jump,jump:transform(${KQOOL_EXECUTABLE} --internal-add-selection={2} --internal-query-file ${queryFile})+change-query()`,
-    ],
-    ...["--border", "rounded"],
-    ...["--color", "border:#3344cb,label:#aeaeae,query:#d9d9d9"],
-    ...[
-      "--color",
-      "fg:#d0d0d0,fg+:#d0d0d0,bg:#121212,bg+:#7f1313,gutter:#121212",
-    ],
-    ...["--color", "hl:#5f87af,hl+:#5fd7ff,info:#afaf87,marker:#87ff00"],
-    ...[
-      "--color",
-      "prompt:#d7005f,spinner:#af5fff,pointer:#af5fff,header:#87afaf",
-    ],
-    ...[
-      "--jump-labels",
-      "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-    ],
-    ...["--marker", ">"],
-    ...["--pointer", "◆"],
-    ...["--preview-window", "border-rounded"],
-    ...["--prompt", "> "],
-    ...["--reverse"],
-    ...["--scrollbar", "│"],
-    ...["--separator", "─"],
-  ]}`.nothrow();
+    {
+      encoding: "utf-8",
+    },
+  );
 
   const finalQuery = await $`jq -r '.query' ${queryFile}`.text();
 
