@@ -6,10 +6,16 @@ const KQOOL_EXECUTABLE = "kqool";
 const CONFIG_FILE = `${os.homedir()}/.kqool.yaml`;
 // const CONFIG_FILE = `.kqool.example.yaml`;
 const HISTORY_FILE = `${os.homedir()}/.kqool.history.kql`;
+
 async function checkForDependencies() {
   const hasJq = await which("jq", { nothrow: true });
   if (!hasJq) {
     echo(chalk.red("Please install jq to use kqool"));
+    process.exit();
+  }
+  const hasFzf = await which("fzf", { nothrow: true });
+  if (!hasFzf) {
+    echo(chalk.red("Please install fzf to use kqool"));
     process.exit();
   }
 }
@@ -161,7 +167,7 @@ async function main() {
   }
 
   if (internalAddSelection && internalQueryFile) {
-    handleAddSelection(internalAddSelection, internalQueryFile);
+    await handleAddSelection(internalAddSelection, internalQueryFile);
     return;
   }
   if (internalReload && internalQueryFile) {
@@ -180,7 +186,6 @@ async function main() {
   })`${[
     "fzf",
     "--border",
-    "--exact",
     "--read0",
     "--gap",
     "--highlight-line",
@@ -241,6 +246,7 @@ async function main() {
   echo("Your query:");
   echo(chalk.bold(finalQuery));
 
+  // TODO: enable clipboard for other OS
   if (await which("pbcopy", { nothrow: true })) {
     await $`cat ${finalQueryFile} | pbcopy`;
   }
