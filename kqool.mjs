@@ -98,11 +98,12 @@ function replacePlaceholders(str, placeholderValues) {
 }
 
 async function reload(internalQueryFile) {
+  const config = getConfig();
   const currentQueryObjects = (await $`cat ${internalQueryFile}`.lines()).map(
     (q) => JSON.parse(q),
   );
 
-  const context = {};
+  const context = config.defaultPlaceholderTransformation ?? {};
 
   currentQueryObjects
     .map((q) => q.placeholderTransformation)
@@ -121,8 +122,8 @@ async function reload(internalQueryFile) {
       });
     });
 
-  const fragmentLines = getConfig()
-    .fragments.flatMap((fragment) => {
+  const fragmentLines = config.fragments
+    .flatMap((fragment) => {
       const queriesWithReplacement = replacePlaceholders(
         fragment.query,
         context,

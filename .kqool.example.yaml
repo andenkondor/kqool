@@ -1,3 +1,9 @@
+defaultPlaceholderTransformation:
+  ago:
+    - "ago(10s)"
+    - "ago(30h)"
+    - "ago(1h)"
+    - "ago(7d)"
 fragments:
   # tables
   - containerAppConsoleLogsTable:
@@ -17,6 +23,8 @@ fragments:
     query: "| project {{column}}, {{column}}"
   - countByHour:
     query: "| summarize CountByHour = count({{column}}) by bin(TimeGenerated, 1h)"
+  - whereAgo:
+    query: "| where {{column}} < {{ago}}"
   # fragments don't need to be full statements
   - orContains:
     query: "or {{column}} contains 'value'"
