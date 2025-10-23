@@ -31,8 +31,8 @@ You can get started via the provided `.kqool.example.yaml`.
 
 ## Usage
 
-- Run kqool with out query parameters
-- Hit <F1> to open the help menu and get started
+- Run kqool without query parameters
+- Hit F1 to open the help menu and get started
 
 ## History
 
