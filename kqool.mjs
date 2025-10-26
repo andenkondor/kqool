@@ -57,17 +57,20 @@ function mergeConfigs(configs) {
   );
 }
 
-function getConfig(defaultConfigFile) {
-  console.log("$$$-64", JSON.stringify(LOCAL_CONFIGS));
-
-  const configs = LOCAL_CONFIGS.map((f) =>
-    YAML.parse(
-      fs.readFileSync(f, {
-        encoding: "utf8",
-        flag: "r",
-      }),
+async function getConfig(remoteConfigs) {
+  const configs = [
+    ...LOCAL_CONFIGS.map((f) =>
+      YAML.parse(
+        fs.readFileSync(f, {
+          encoding: "utf8",
+          flag: "r",
+        }),
+      ),
     ),
-  );
+    ...(
+      await Promise.all(remoteConfigs.map((r) => $`curl -s ${r}`.text()))
+    ).map((r) => YAML.parse(r)),
+  ];
 
   const overallConfig = mergeConfigs(configs);
 
@@ -182,17 +185,25 @@ async function main() {
   const {
     s: internalAddSelection,
     f: internalStateFile,
-    r: internalReload,
+    l: internalReload,
+    r: remoteConfig,
     h: showHelp,
   } = minimist(process.argv.slice(3), {
     alias: {
       s: "internal-add-selection",
       f: "internal-state-file",
-      r: "internal-reload",
+      l: "internal-reload",
+      r: "remote-config",
       h: "help",
     },
-    boolean: ["r", "h"],
+    boolean: ["l", "h"],
   });
+
+  const remoteConfigs = remoteConfig
+    ? Array.isArray(remoteConfig)
+      ? remoteConfig
+      : [remoteConfig]
+    : [];
 
   if (showHelp) {
     echo("Execute kqool and hit F1 to see all possible actions.");
@@ -210,7 +221,7 @@ async function main() {
   }
 
   const stateFile = await createTempFile({
-    config: getConfig(),
+    config: await getConfig(remoteConfigs),
     selection: [],
   });
 
