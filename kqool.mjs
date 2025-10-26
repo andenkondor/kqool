@@ -30,31 +30,33 @@ ${fileContent}`,
 }
 
 function mergeConfigs(configs) {
-  return configs.reduce(
-    (prev, current) => {
-      const defaultPlaceholderTransformation =
-        prev?.defaultPlaceholderTransformation ?? {};
-      Object.entries(current?.defaultPlaceholderTransformation ?? {}).forEach(
-        ([key, value]) => {
-          defaultPlaceholderTransformation[key] = [
-            ...new Set([
-              ...(defaultPlaceholderTransformation?.[key] || []),
-              ...value,
-            ]),
-          ];
-        },
-      );
+  return configs
+    .filter((c) => !!c)
+    .reduce(
+      (prev, current) => {
+        const defaultPlaceholderTransformation =
+          prev?.defaultPlaceholderTransformation ?? {};
+        Object.entries(current?.defaultPlaceholderTransformation ?? {}).forEach(
+          ([key, value]) => {
+            defaultPlaceholderTransformation[key] = [
+              ...new Set([
+                ...(defaultPlaceholderTransformation?.[key] || []),
+                ...value,
+              ]),
+            ];
+          },
+        );
 
-      return {
-        defaultPlaceholderTransformation,
-        fragments: [...prev.fragments, ...current.fragments],
-      };
-    },
-    {
-      defaultPlaceholderTransformation: {},
-      fragments: [],
-    },
-  );
+        return {
+          defaultPlaceholderTransformation,
+          fragments: [...prev.fragments, ...current.fragments],
+        };
+      },
+      {
+        defaultPlaceholderTransformation: {},
+        fragments: [],
+      },
+    );
 }
 
 async function getConfig(remoteConfigs) {
@@ -75,9 +77,8 @@ async function getConfig(remoteConfigs) {
   const overallConfig = mergeConfigs(configs);
 
   if (!overallConfig.fragments.length) {
-    chalk.red(`No fragments found.
-Please specify config at ${defaultConfigFile}`);
-    process.exit();
+    chalk.red("No config found.");
+    process.exit(1);
   }
 
   return overallConfig;
