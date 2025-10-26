@@ -208,6 +208,7 @@ async function main() {
 
   if (showHelp) {
     echo("Execute kqool and hit F1 to see all possible actions.");
+    echo("--remote-config: <url of remote config>");
     return;
   }
 

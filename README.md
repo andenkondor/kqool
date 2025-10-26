@@ -29,16 +29,20 @@ zx kqool.mjs
 You can configure your query fragments via config files written in yaml.
 The structure can be adapted from the `.kqool.example.yaml`.
 
-| Type   | Location                                                                     | Description                                                                                                                                                |
-| ------ | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Home   | `~/.kqool.yaml`                                                              | Is used for all `kqool` invocations.                                                                                                                       |
-| CWD    | `<cwd>/someFolder/.kqool.yaml`                                               | Can be somewhere nested in the cwd where `kqool` is invoked. Allows for project specific configuration. |
+| Type   | Location                                             | Description                                                                                                                                                |
+| ------ | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Home   | `~/.kqool.yaml`                                      | Is used for all `kqool` invocations.                                                                                                                       |
+| CWD    | `<cwd>/someFolder/.kqool.yaml`                       | Can be somewhere nested in the cwd where `kqool` is invoked. Allows for project specific configuration.                                                    |
 | Remote | `kqool --remote-config='https://url.to.config.file'` | Allows to reference remote config files for collaboration. Url needs to provide yaml text in raw format. Multiple remote files can be used simultaneously. |
 
 ## Usage
 
 - Run kqool without query parameters
 - Hit F1 to open the help menu and get started
+
+## Parameters
+
+- `--remote-config`:`<string>`: Pass url for remote configuration file.
 
 ## History
 
