@@ -2,8 +2,8 @@
 
 $.verbose = false;
 
-const KQOOL_EXECUTABLE = "./kqool.mjs";
-const CONFIG_FILE = `${os.homedir()}/.kqool.yaml`;
+const KQOOL_EXECUTABLE = "kqool";
+const LOCAL_CONFIGS = glob.sync([`{${os.homedir()},**}/.kqool.yaml`]);
 const HISTORY_FILE = `${os.homedir()}/.kqool.history.kql`;
 
 const NTH = {
@@ -29,23 +29,54 @@ ${fileContent}`,
   );
 }
 
-function getConfig() {
-  try {
-    return YAML.parse(
-      fs.readFileSync(CONFIG_FILE, {
+function mergeConfigs(configs) {
+  return configs.reduce(
+    (prev, current) => {
+      const { defaultPlaceholderTransformation } = prev;
+      Object.entries(current.defaultPlaceholderTransformation).forEach(
+        ([key, value]) => {
+          defaultPlaceholderTransformation[key] = [
+            ...new Set([
+              ...(defaultPlaceholderTransformation[key] || []),
+              ...value,
+            ]),
+          ];
+        },
+      );
+
+      return {
+        defaultPlaceholderTransformation,
+        fragments: [...prev.fragments, ...current.fragments],
+      };
+    },
+    {
+      defaultPlaceholderTransformation: {},
+      fragments: [],
+    },
+  );
+}
+
+function getConfig(defaultConfigFile) {
+  console.log("$$$-64", JSON.stringify(LOCAL_CONFIGS));
+
+  const configs = LOCAL_CONFIGS.map((f) =>
+    YAML.parse(
+      fs.readFileSync(f, {
         encoding: "utf8",
         flag: "r",
       }),
-    );
-  } catch (e) {
-    echo(
-      chalk.red(`You have no valid config file configured.
-Please create a config file under ${CONFIG_FILE}.
-You can take TBD as a starting point.`),
-    );
-    process.exit(1);
-    return;
+    ),
+  );
+
+  const overallConfig = mergeConfigs(configs);
+
+  if (!overallConfig.fragments.length) {
+    chalk.red(`No fragments found.
+Please specify config at ${defaultConfigFile}`);
+    process.exit();
   }
+
+  return overallConfig;
 }
 
 function toBase64(input) {
@@ -104,22 +135,13 @@ async function reload(stateFile) {
     }),
   );
 
-  const placeHolderTransformations =
-    config.defaultPlaceholderTransformation ?? {};
-
-  selection
-    .map((q) => q.placeholderTransformation)
-    .filter((p) => Boolean(p))
-    .forEach((placeholderTransformation) => {
-      Object.keys(placeholderTransformation).forEach((placeholderKey) => {
-        placeHolderTransformations[placeholderKey] = [
-          ...new Set(
-            ...(placeHolderTransformations[placeholderKey] ?? []),
-            placeholderTransformation[placeholderKey],
-          ),
-        ];
-      });
-    });
+  const placeHolderTransformations = mergeConfigs([
+    config,
+    ...selection.map((s) => ({
+      fragments: [],
+      defaultPlaceholderTransformation: s.placeholderTransformation,
+    })),
+  ]).defaultPlaceholderTransformation;
 
   const fragmentLines = config.fragments
     .flatMap((fragment) => {
