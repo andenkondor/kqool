@@ -26,8 +26,14 @@ zx kqool.mjs
 
 ## Configuration
 
-Create a config file named `.kqool.yaml` in your home directory (`~/.kqool.yaml`) to customize query fragments.
-You can get started via the provided `.kqool.example.yaml`.
+You can configure your query fragments via config files written in yaml.
+The structure can be adapted from the `.kqool.example.yaml`.
+
+| Type   | Location                                                                     | Description                                                                                                                                                |
+| ------ | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Home   | `~/.kqool.yaml`                                                              | Is used for all `kqool` invocations.                                                                                                                       |
+| CWD    | `<cwd>/someFolder/.kqool.yaml`                                               | Can be somewhere nested in the cwd where `kqool` is invoked. Allows for project specific configuration. |
+| Remote | `kqool --remote-config='https://url.to.config.file'` | Allows to reference remote config files for collaboration. Url needs to provide yaml text in raw format. Multiple remote files can be used simultaneously. |
 
 ## Usage
 
@@ -36,5 +42,4 @@ You can get started via the provided `.kqool.example.yaml`.
 
 ## History
 
-kqool will save all your queries to `~/.kqool.history.kql` if the file exists. Create this file to enable automatic
-history saving.
+kqool will save all your queries to `~/.kqool.history.kql` if the file exists. Create this file to enable automatic history saving.
