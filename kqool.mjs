@@ -32,12 +32,13 @@ ${fileContent}`,
 function mergeConfigs(configs) {
   return configs.reduce(
     (prev, current) => {
-      const { defaultPlaceholderTransformation } = prev;
-      Object.entries(current.defaultPlaceholderTransformation).forEach(
+      const defaultPlaceholderTransformation =
+        prev?.defaultPlaceholderTransformation ?? {};
+      Object.entries(current?.defaultPlaceholderTransformation ?? {}).forEach(
         ([key, value]) => {
           defaultPlaceholderTransformation[key] = [
             ...new Set([
-              ...(defaultPlaceholderTransformation[key] || []),
+              ...(defaultPlaceholderTransformation?.[key] || []),
               ...value,
             ]),
           ];
